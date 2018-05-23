@@ -53,7 +53,7 @@ contract ERC20 {
 		require(_to != msg.sender);                                 // Check if sender and receiver is not same
 		balanceOf[msg.sender] = balanceOf[msg.sender].sub(_value);  // Subtract value from sender
 		balanceOf[_to] = balanceOf[_to].add(_value);                // Add the value to the receiver
-		Transfer(msg.sender, _to, _value);                          // Notify all clients about the transfer events
+		emit Transfer(msg.sender, _to, _value);                     // Notify all clients about the transfer events
         return true;
 	}
 
@@ -69,21 +69,18 @@ contract ERC20 {
          address _to,
          uint256 _amount
      ) public returns (bool success)
-      {
-         if ((balanceOf[_from] >= _amount)
-             && (allowed[_from][msg.sender] >= _amount)
-             && (_amount > 0)
-             && (balanceOf[_to].add(_amount) > balanceOf[_to])
-             && (_from!=_to))
-        {             
-             balanceOf[_from] = balanceOf[_from].sub(_amount);
-             allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
-             balanceOf[_to] = balanceOf[_to].add(_amount);
-             return true;
-        } else {
-             return false;
-        }
+      { 
+        require(balanceOf[_from] >= _amount);
+        require(allowed[_from][msg.sender] >= _amount);
+        require(_amount > 0);
+        require(_to != address(0));
+        require(_to != msg.sender);          
+        balanceOf[_from] = balanceOf[_from].sub(_amount);
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_amount);
+        balanceOf[_to] = balanceOf[_to].add(_amount);
+        return true;        
     }
+    
     
     /* This function allows _spender to withdraw from your account, multiple times, up to the _value amount.
      * If this function is called again it overwrites the current allowance with _value.
@@ -93,7 +90,7 @@ contract ERC20 {
      function approve(address _spender, uint256 _amount) public returns (bool success) {
          require(_spender != msg.sender);
          allowed[msg.sender][_spender] = _amount;
-         Approval(msg.sender, _spender, _amount);
+         emit Approval(msg.sender, _spender, _amount);
          return true;
     } 
 

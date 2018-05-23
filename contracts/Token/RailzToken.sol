@@ -22,7 +22,6 @@ contract RailzToken is Owned, ERC20 {
 	function RailzToken() 
 
 	ERC20 (tokenSupply,"Railz","RLZ") public
-    //ERC20 (tokenSupply,"WJRails","RLS") public
     {
 		owner = msg.sender;
 	}           
@@ -51,12 +50,21 @@ contract RailzToken is Owned, ERC20 {
       Burn(burner, _value);
   }
 
-   /* This function is used to lock a user's token or unlock already locked tokens, tokens once locked cannot be transferred
+   /* This function is used to lock a user's token , tokens once locked cannot be transferred
      * only admin can invoke this function
-     * @param _target address of the target 
-     * @param _isLock boolean value
+     * @param _target address of the target      
      */
-    function lockAccount(address _target, bool _isLock) public onlyOwner {
-        isLockedAccount[_target] = _isLock;       
+    function lockAccount(address _target) public onlyOwner {
+        require(_target != address(0));
+        isLockedAccount[_target] = true;       
+    }
+
+     /* This function is used to unlock a user's already locked tokens
+     * only admin can invoke this function
+     * @param _target address of the target      
+     */
+    function lockAccount(address _target) public onlyOwner {
+        require(_target != address(0));
+        isLockedAccount[_target] = false;       
     }
 }

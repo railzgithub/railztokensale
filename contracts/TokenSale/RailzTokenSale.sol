@@ -22,16 +22,14 @@ contract RailzTokenSale is Owned {
     
 	// start and end timestamps when contributions are allowed  (both inclusive)
 	uint256 public presalestartTime = 1525161600 ;     //1st may 8:00 am UTC
-	uint256 public presaleendTime = 1527811140 ;       //31st may 23:59 pm UTC
+	uint256 public presaleendTime = 1527811199 ;       //31st may 23:59 pm UTC
 	uint256 public publicsalestartTime = 1527840000 ;  //1st june 8:00 am UTC
-	uint256 public publicsalesendTime = 1530403140 ;   //30 june 23:59 pm UTC
+	uint256 public publicsalesendTime = 1530403199 ;   //30 june 23:59 pm UTC
 
-	//variables for soft cap and hard cap
-	uint256 public hardCap = 100000;
 
 	//token caps for each round
-	uint256 public presalesCap = 120000000 ;
-	uint256 public publicsalesCap = 350000000;
+	uint256 public presalesCap = 120000000 * (1e18);
+	uint256 public publicsalesCap = 350000000 * (1e18);
 
 	//token price for each round
 	uint256 public presalesTokenPriceInWei =  80000000000000 ; // 0.00008 ether;
@@ -54,7 +52,6 @@ contract RailzTokenSale is Owned {
 
 	bool hasPreTokenSalesCapReached = false;
 	bool hasTokenSalesCapReached = false;
-	bool hasHardCapReached = false;
 
 	// events for funds received and tokens
 	event ContributionReceived(address indexed contributor, uint256 value, uint256 numberOfTokens);
@@ -91,7 +88,7 @@ contract RailzTokenSale is Owned {
 		//calculate number of tokens to be given
 		if (isPreTokenSaleActive()) {
 			numberOfTokens = msg.value/presalesTokenPriceInWei;
-            numberOfTokens = numberOfTokens * 10^18;
+            numberOfTokens = numberOfTokens * (1e18);
 			require((numberOfTokens + numberOfTokensAllocated) <= presalesCap);			//Check whether remaining tokens are greater than tokens to allocate
 
 			tokensAllocated[msg.sender] = tokensAllocated[msg.sender].add(numberOfTokens);
@@ -101,10 +98,11 @@ contract RailzTokenSale is Owned {
 		    forwardFunds(); 
 
 			//Notify server that an contribution has been received
-			ContributionReceived(msg.sender, msg.value, numberOfTokens);
+			emit ContributionReceived(msg.sender, msg.value, numberOfTokens);
 
 		} else if (isTokenSaleActive()) {
 			numberOfTokens = msg.value/publicsalesTokenPriceInWei;
+			numberOfTokens = numberOfTokens * (1e18);
 			require((numberOfTokens + numberOfTokensAllocated) <= (presalesCap + publicsalesCap));	//Check whether remaining tokens are greater than tokens to allocate
 
 			tokensAllocated[msg.sender] = tokensAllocated[msg.sender].add(numberOfTokens);
@@ -114,7 +112,7 @@ contract RailzTokenSale is Owned {
 		    forwardFunds();
 
 			//Notify server that an contribution has been received
-		    ContributionReceived(msg.sender, msg.value, numberOfTokens);
+		    emit ContributionReceived(msg.sender, msg.value, numberOfTokens);
 		}        
 
 		// check if hard cap has been reached or not , if it has reached close the contract
@@ -130,7 +128,7 @@ contract RailzTokenSale is Owned {
 		else if (isTokenSaleActive())
 			return (!hasTokenSalesCapReached);
 		else
-			return (!hasHardCapReached);
+			return false;
 	}
 
 	// send ether to the fund collection wallet  , this ideally would be an multisig wallet
@@ -161,10 +159,10 @@ contract RailzTokenSale is Owned {
 	//This function is used to transfer token to contributor after successful audit
 	function transferToken(address _contributor) public onlyOwner {
 		require(_contributor != 0);
-    uint256 numberOfTokens = tokensAllocated[_contributor];
-    tokensAllocated[_contributor] = 0;    
+        uint256 numberOfTokens = tokensAllocated[_contributor];
+        tokensAllocated[_contributor] = 0;    
 		token.transfer(_contributor, numberOfTokens);
-		TokensTransferred(_contributor, numberOfTokens);
+		emit TokensTransferred(_contributor, numberOfTokens);
 	}
 
 	//This function is used to transfer token to contributor after successful audit
@@ -172,7 +170,7 @@ contract RailzTokenSale is Owned {
 		require(_numberOfTokens > 0);
 		require(_contributor != 0);
 		token.transfer(_contributor, _numberOfTokens);
-		TokensTransferred(_contributor,_numberOfTokens);
+		emit ManualTokensTransferred(_contributor,_numberOfTokens);
 	}
 
 	//This function is used refund contribution of a contributor in case soft cap is not reached or audit of an contributor failed
@@ -191,9 +189,7 @@ contract RailzTokenSale is Owned {
     	if (isPreTokenSaleActive() && (numberOfTokensAllocated > presalesCap))  
         	hasPreTokenSalesCapReached = true;
      	else if (isTokenSaleActive() && (numberOfTokensAllocated > (presalesCap + publicsalesCap)))     
-        	hasTokenSalesCapReached = true;
-     	else if (weiRaised > hardCap)
-        	hasHardCapReached = true;
+        	hasTokenSalesCapReached = true;     	
     }
 
   	//This function allows the owner to update the gas price limit public onlyOwner     
