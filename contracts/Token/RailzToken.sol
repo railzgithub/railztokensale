@@ -63,7 +63,7 @@ contract RailzToken is Owned, ERC20 {
      * only admin can invoke this function
      * @param _target address of the target      
      */
-    function lockAccount(address _target) public onlyOwner {
+    function unlockAccount(address _target) public onlyOwner {
         require(_target != address(0));
         isLockedAccount[_target] = false;       
     }
