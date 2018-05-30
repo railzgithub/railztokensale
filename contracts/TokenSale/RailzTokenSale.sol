@@ -166,10 +166,19 @@ contract RailzTokenSale is Owned {
 	}
 
 
-	//This function is used to do bulk transfer token to contributor after successful audit
-	 function batchtransferToken(uint256[] amount, address[] wallets) public {
+	//This function is used to do bulk transfer token to contributor after successful audit manually
+	 function manualBatchTransferToken(uint256[] amount, address[] wallets) public {
         for (uint256 i = 0; i < wallets.length; i++) {
             token.transfer(wallets[i], amount[i]);
+        }
+    }
+
+	//This function is used to do bulk transfer token to contributor after successful audit
+	 function batchTransferToken(address[] wallets) public {
+        for (uint256 i = 0; i < wallets.length; i++) {
+			uint256 amountOfTokens = tokensAllocated[wallets[i]];
+			tokensAllocated[wallets[i]]=0;
+            token.transfer(wallets[i], amountOfTokens);
         }
     }
 
