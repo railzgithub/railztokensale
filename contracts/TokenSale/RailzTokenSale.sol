@@ -21,10 +21,10 @@ contract RailzTokenSale is Owned {
 	mapping (address=> uint256) tokensAllocated;
     
 	// start and end timestamps when contributions are allowed  (both inclusive)
-	uint256 public presalestartTime =1528099200 ;     //4th June 8:00 am UTC
-	uint256 public presaleendTime = 1530489540;       //1st July 23:59 pm UTC
+	uint256 public presalestartTime =1528032600 ;     //4th June 8:00 am UTC
+	uint256 public presaleendTime = 1530489599;       //1st July 23:59 pm UTC
 	uint256 public publicsalestartTime = 1530518400;  //2nd July 8:00 am UTC
-	uint256 public publicsalesendTime = 1532908740;   //29th July 23:59 pm UTC
+	uint256 public publicsalesendTime = 1532908799;   //29th July 23:59 pm UTC
 
 
 	//token caps for each round
@@ -57,6 +57,8 @@ contract RailzTokenSale is Owned {
 	event ContributionReceived(address indexed contributor, uint256 value, uint256 numberOfTokens);
 	event TokensTransferred(address indexed contributor, uint256 numberOfTokensTransferred);
 	event ManualTokensTransferred(address indexed contributor, uint256 numberOfTokensTransferred);
+	event PreTokenSalesCapReached(address indexed contributor);
+	event TokenSalesCapReached(address indexed contributor);
 
 	function RailzTokenSale(RailzToken _addressOfRewardToken, address _wallet) public {        
   		require(presalestartTime >= now); 
@@ -149,11 +151,13 @@ contract RailzTokenSale is Owned {
 	// Called by owner when preico token cap has been reached
 	function preTokenSalesCapReached() internal {
 		hasPreTokenSalesCapReached = true;
+		emit PreTokenSalesCapReached(msg.sender);
 	}
 
 	// Called by owner when ico token cap has been reached
 	function tokenSalesCapReached() internal {
 		hasTokenSalesCapReached = true;
+		emit TokenSalesCapReached(msg.sender);
 	}
 
 	//This function is used to transfer token to contributor after successful audit
