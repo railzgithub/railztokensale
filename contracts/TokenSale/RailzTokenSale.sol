@@ -171,7 +171,7 @@ contract RailzTokenSale is Owned {
 
 
 	//This function is used to do bulk transfer token to contributor after successful audit manually
-	 function manualBatchTransferToken(uint256[] amount, address[] wallets) public {
+	 function manualBatchTransferToken(uint256[] amount, address[] wallets) public onlyOwner {
         for (uint256 i = 0; i < wallets.length; i++) {
             token.transfer(wallets[i], amount[i]);
 			emit TokensTransferred(wallets[i], amount[i]);
@@ -179,7 +179,7 @@ contract RailzTokenSale is Owned {
     }
 
 	//This function is used to do bulk transfer token to contributor after successful audit
-	 function batchTransferToken(address[] wallets) public {
+	 function batchTransferToken(address[] wallets) public onlyOwner {
         for (uint256 i = 0; i < wallets.length; i++) {
 			uint256 amountOfTokens = tokensAllocated[wallets[i]];
 			require(amountOfTokens > 0);
@@ -191,7 +191,7 @@ contract RailzTokenSale is Owned {
 	
 	//This function is used refund contribution of a contributor in case soft cap is not reached or audit of an contributor failed
 	function refundContribution(address _contributor, uint256 _weiAmount) public onlyOwner returns (bool) {
-		require(_contributor != 0);
+		require(_contributor != 0);                                                                                                                                     
 		if (!_contributor.send(_weiAmount)) {
 			return false;
 		} else {
