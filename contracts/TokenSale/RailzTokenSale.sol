@@ -18,7 +18,7 @@ contract RailzTokenSale is Owned {
 	using SafeMath for uint256;
 
 	mapping (address=> uint256) contributors;
-	mapping (address=> uint256) tokensAllocated;
+	mapping (address=> uint256) public tokensAllocated;
     
 	// start and end timestamps when contributions are allowed  (both inclusive)
 	uint256 public presalestartTime =1528032600 ;     //4th June 8:00 am UTC
